@@ -48,7 +48,8 @@ router.get("/:id", (req, res) => {
 
 router.post("/", (req, res) => {
   const id = "l_" + Math.random().toString(36).slice(2, 8);
-  res.status(201).json({ data: { id, ...req.body } });
+  // Spread `req.body` first so server-controlled `id` cannot be overridden.
+  res.status(201).json({ data: { ...req.body, id } });
 });
 
 export default router;
