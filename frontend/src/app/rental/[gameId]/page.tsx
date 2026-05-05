@@ -17,25 +17,25 @@ export default function RentalGamePage({
   params: { gameId: string };
 }) {
   const game = MOCK_RENTALS.find((r) => r.gameId === params.gameId);
-  const [plan, setPlan] = useState<Plan>("week");
   if (!game) notFound();
+  const [plan, setPlan] = useState<Plan>("week");
 
   const price =
     plan === "day"
-      ? game!.pricePerDay
+      ? game.pricePerDay
       : plan === "week"
-        ? game!.pricePerWeek
-        : game!.pricePerMonth;
+        ? game.pricePerWeek
+        : game.pricePerMonth;
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
         <Card padding="none" className="overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={game!.cover} alt={game!.gameName} className="w-full aspect-[21/9] object-cover" />
+          <img src={game.cover} alt={game.gameName} className="w-full aspect-[21/9] object-cover" />
         </Card>
         <Card padding="lg">
-          <h1 className="text-3xl font-bold mb-3">{game!.gameName}</h1>
+          <h1 className="text-3xl font-bold mb-3">{game.gameName}</h1>
           <p className="text-white/80">
             Арендуй официальный игровой аккаунт с активированной игрой. Никаких
             запретов, чистая запись, поддержка обновлений и DLC.
@@ -62,9 +62,9 @@ export default function RentalGamePage({
           <p className="text-secondary text-sm mb-3">Выберите тариф</p>
           <div className="space-y-2 mb-5">
             {[
-              { id: "day", label: "1 день", price: game!.pricePerDay },
-              { id: "week", label: "1 неделя", price: game!.pricePerWeek, badge: "Популярно" },
-              { id: "month", label: "1 месяц", price: game!.pricePerMonth, badge: "Выгодно" },
+              { id: "day", label: "1 день", price: game.pricePerDay },
+              { id: "week", label: "1 неделя", price: game.pricePerWeek, badge: "Популярно" },
+              { id: "month", label: "1 месяц", price: game.pricePerMonth, badge: "Выгодно" },
             ].map((p) => (
               <button
                 key={p.id}

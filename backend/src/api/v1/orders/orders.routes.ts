@@ -26,13 +26,15 @@ router.get("/:id", (req, res) => {
 
 router.post("/", (req, res) => {
   const id = "o_" + Math.random().toString(36).slice(2, 8);
+  // Spread `req.body` first so server-controlled fields (id, status, etc.)
+  // cannot be overridden by client input.
   res.status(201).json({
     data: {
+      ...req.body,
       id,
       status: "PENDING",
       paymentStatus: "UNPAID",
       createdAt: new Date().toISOString(),
-      ...req.body,
     },
   });
 });
