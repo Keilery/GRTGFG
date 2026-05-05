@@ -1,0 +1,481 @@
+// Prisma schema — NexusMarket
+// Полная схема БД (PostgreSQL).
+// Эта схема — артефакт спецификации; миграции пока не запускаются.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
+  OWNER
+}
+
+enum UserLevel {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum DeliveryType {
+  AUTO
+  MANUAL
+  INSTANT
+}
+
+enum ListingStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  PAUSED
+  SOLD
+  EXPIRED
+  REJECTED
+  DELETED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  DELIVERING
+  COMPLETED
+  DISPUTED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  PARTIALLY_REFUNDED
+  REFUNDED
+  FAILED
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  PURCHASE
+  SALE
+  REFUND
+  FEE
+  BONUS
+  REFERRAL
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum BotStatus {
+  RUNNING
+  PAUSED
+  STOPPED
+  ERROR
+}
+
+enum BotType {
+  FUNPAY
+  STEAM
+  PLAYEROK
+  STARVELL
+  DISCORD
+  TELEGRAM
+}
+
+enum TicketStatus {
+  OPEN
+  PENDING
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum NotificationType {
+  ORDER
+  PAYMENT
+  REVIEW
+  SUPPORT
+  SYSTEM
+  PROMOTION
+  BOT
+}
+
+enum CouponType {
+  PERCENT
+  FIXED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  username      String    @unique
+  passwordHash  String?
+  role          UserRole  @default(USER)
+  level         UserLevel @default(BRONZE)
+  avatar        String?
+  banner        String?
+  bio           String?
+  balance       Float     @default(0)
+  rating        Float     @default(0)
+  salesCount    Int       @default(0)
+  verified      Boolean   @default(false)
+  twoFactor     Boolean   @default(false)
+  twoFactorSecret String?
+  language      String    @default("ru")
+  currency      String    @default("RUB")
+  emailVerified Boolean   @default(false)
+  phoneVerified Boolean   @default(false)
+  kycVerified   Boolean   @default(false)
+  bannedAt      DateTime?
+  banReason     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  listings      Listing[]
+  ordersBuyer   Order[]   @relation("BuyerOrders")
+  ordersSeller  Order[]   @relation("SellerOrders")
+  reviewsAuthor Review[]  @relation("ReviewAuthor")
+  transactions  Transaction[]
+  apiKeys       ApiKey[]
+  sessions      Session[]
+  notifications Notification[]
+  tickets       Ticket[]
+  bots          Bot[]
+  rentals       Rental[]
+  refReferred   Referral[] @relation("Referrer")
+  refRecord     Referral?  @relation("Referred")
+
+  @@map("users")
+}
+
+model Game {
+  id              String    @id @default(cuid())
+  name            String
+  cover           String?
+  description     String?
+  isActive        Boolean   @default(true)
+
+  listings        Listing[]
+  products        Product[]
+  rentals         Rental[]
+
+  @@map("games")
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  icon      String?
+  parentId  String?
+  parent    Category? @relation("Subcategories", fields: [parentId], references: [id])
+  children  Category[] @relation("Subcategories")
+
+  listings  Listing[]
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id              String       @id @default(cuid())
+  name            String
+  description     String
+  price           Float
+  category        Category     @relation(fields: [categoryId], references: [id])
+  categoryId      String
+  game            Game?        @relation(fields: [gameId], references: [id])
+  gameId          String?
+  images          String[]
+  stock           Int          @default(-1)
+  sold            Int          @default(0)
+  isDigital       Boolean      @default(true)
+  deliveryType    DeliveryType @default(AUTO)
+  deliveryData    String?
+  isActive        Boolean      @default(true)
+  isFeatured      Boolean      @default(false)
+  isNew           Boolean      @default(false)
+  isHot           Boolean      @default(false)
+  tags            String[]
+  metadata        Json?
+  views           Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  reviews         Review[]
+  orderItems      OrderItem[]
+
+  @@map("products")
+}
+
+model Listing {
+  id           String        @id @default(cuid())
+  seller       User          @relation(fields: [sellerId], references: [id])
+  sellerId     String
+  title        String
+  description  String
+  price        Float
+  negotiable   Boolean       @default(false)
+  images       String[]
+  category     Category      @relation(fields: [categoryId], references: [id])
+  categoryId   String
+  game         Game?         @relation(fields: [gameId], references: [id])
+  gameId       String?
+  status       ListingStatus @default(ACTIVE)
+  deliveryTime String?
+  server       String?
+  character    String?
+  tags         String[]
+  views        Int           @default(0)
+  favorites    Int           @default(0)
+  moderatedAt  DateTime?
+  moderatedBy  String?
+  rejectReason String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  expiresAt    DateTime?
+
+  orders       Order[]
+  reviews      Review[]
+
+  @@map("listings")
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  buyer         User          @relation("BuyerOrders", fields: [buyerId], references: [id])
+  buyerId       String
+  seller        User?         @relation("SellerOrders", fields: [sellerId], references: [id])
+  sellerId      String?
+  listing       Listing?      @relation(fields: [listingId], references: [id])
+  listingId     String?
+  items         OrderItem[]
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(UNPAID)
+  subtotal      Float
+  fee           Float
+  discount      Float         @default(0)
+  total         Float
+  paymentMethod String?
+  paymentId     String?
+  deliveryType  String?
+  deliveryData  String?
+  note          String?
+  adminNote     String?
+  disputeAt     DateTime?
+  disputeReason String?
+  resolvedAt    DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  completedAt   DateTime?
+
+  transaction   Transaction?
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   String
+  product   Product? @relation(fields: [productId], references: [id])
+  productId String?
+  name      String
+  price     Float
+  quantity  Int      @default(1)
+
+  @@map("order_items")
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  author     User     @relation("ReviewAuthor", fields: [authorId], references: [id])
+  authorId   String
+  product    Product? @relation(fields: [productId], references: [id])
+  productId  String?
+  listing    Listing? @relation(fields: [listingId], references: [id])
+  listingId  String?
+  rating     Int
+  text       String?
+  createdAt  DateTime @default(now())
+
+  @@map("reviews")
+}
+
+model Transaction {
+  id          String            @id @default(cuid())
+  user        User              @relation(fields: [userId], references: [id])
+  userId      String
+  order       Order?            @relation(fields: [orderId], references: [id])
+  orderId     String?           @unique
+  type        TransactionType
+  amount      Float
+  fee         Float             @default(0)
+  balance     Float
+  status      TransactionStatus @default(COMPLETED)
+  description String?
+  metadata    Json?
+  createdAt   DateTime          @default(now())
+
+  @@map("transactions")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  user      User             @relation(fields: [userId], references: [id])
+  userId    String
+  type      NotificationType
+  title     String
+  body      String
+  data      Json?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@map("notifications")
+}
+
+model Ticket {
+  id        String         @id @default(cuid())
+  user      User           @relation(fields: [userId], references: [id])
+  userId    String
+  subject   String
+  category  String
+  status    TicketStatus   @default(OPEN)
+  priority  TicketPriority @default(MEDIUM)
+  assigneeId String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  closedAt  DateTime?
+
+  messages  TicketMessage[]
+
+  @@map("tickets")
+}
+
+model TicketMessage {
+  id        String   @id @default(cuid())
+  ticket    Ticket   @relation(fields: [ticketId], references: [id])
+  ticketId  String
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+
+  @@map("ticket_messages")
+}
+
+model Bot {
+  id                String    @id @default(cuid())
+  user              User      @relation(fields: [userId], references: [id])
+  userId            String
+  name              String
+  type              BotType
+  status            BotStatus @default(STOPPED)
+  config            Json
+  uptime            Int       @default(0)
+  messagesProcessed Int       @default(0)
+  salesCount        Int       @default(0)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@map("bots")
+}
+
+model Rental {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  game       Game     @relation(fields: [gameId], references: [id])
+  gameId     String
+  startedAt  DateTime
+  expiresAt  DateTime
+  cost       Float
+  isActive   Boolean  @default(true)
+  credentials Json?
+
+  @@map("rentals")
+}
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String
+  name        String
+  key         String    @unique
+  permissions String[]
+  lastUsedAt  DateTime?
+  usageCount  Int       @default(0)
+  isActive    Boolean   @default(true)
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@map("api_keys")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  token     String   @unique
+  ip        String?
+  userAgent String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("sessions")
+}
+
+model Referral {
+  id          String   @id @default(cuid())
+  referrer    User     @relation("Referrer", fields: [referrerId], references: [id])
+  referrerId  String
+  referred    User     @relation("Referred", fields: [referredId], references: [id])
+  referredId  String   @unique
+  bonus       Float    @default(0)
+  createdAt   DateTime @default(now())
+
+  @@map("referrals")
+}
+
+model Coupon {
+  id        String     @id @default(cuid())
+  code      String     @unique
+  type      CouponType
+  value     Float
+  minOrder  Float?
+  maxUses   Int?
+  usedCount Int        @default(0)
+  isActive  Boolean    @default(true)
+  expiresAt DateTime?
+  createdAt DateTime   @default(now())
+
+  @@map("coupons")
+}
+
+model SiteSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+
+  @@map("site_settings")
+}
