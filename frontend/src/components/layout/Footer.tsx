@@ -31,6 +31,9 @@ export function Footer() {
             <li>
               <Link href="/rental">Аренда игр</Link>
             </li>
+            <li>
+              <Link href="/features">Plan A · 552 функции</Link>
+            </li>
           </ul>
         </div>
         <div>
@@ -48,29 +51,32 @@ export function Footer() {
             <li>
               <Link href="/support">Контакты</Link>
             </li>
+            <li>
+              <Link href="/developers">API / Developers</Link>
+            </li>
           </ul>
         </div>
         <div>
           <h4 className="text-white font-semibold mb-3">Юридическое</h4>
           <ul className="space-y-2">
             <li>
-              <Link href="#">Условия использования</Link>
+              <Link href="/terms">Условия использования</Link>
             </li>
             <li>
-              <Link href="#">Политика конфиденциальности</Link>
+              <Link href="/privacy">Политика конфиденциальности</Link>
             </li>
             <li>
-              <Link href="#">Cookie</Link>
+              <Link href="/privacy#cookies">Cookie</Link>
             </li>
             <li>
-              <Link href="#">Гарантия сделки</Link>
+              <Link href="/security">Гарантия сделки</Link>
             </li>
           </ul>
         </div>
       </div>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 mt-8 pt-6 border-t border-white/[0.04] flex justify-between flex-wrap gap-2 text-xs">
         <span>© 2026 {APP_NAME}. Все права защищены.</span>
-        <span>v0.1.0 — MVP</span>
+        <span>v1.0.0 — Plan A coverage build</span>
       </div>
     </footer>
   );

@@ -1,11 +1,21 @@
 import Link from "next/link";
-import { ArrowRight, Sparkles, Shield, Zap, Bot, TrendingUp, Users } from "lucide-react";
+import {
+  ArrowRight,
+  Sparkles,
+  Shield,
+  Zap,
+  Bot,
+  TrendingUp,
+  Users,
+  Boxes,
+} from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { GlassPanel } from "@/components/ui/GlassPanel";
 import { Badge } from "@/components/ui/Badge";
 import { ProductCard } from "@/components/marketplace/ProductCard";
 import { MOCK_LISTINGS, MOCK_GAMES } from "@/lib/mock-data";
+import { PLAN_MODULES, PLAN_TOTAL_FEATURES } from "@/lib/plan-features";
 import { formatNumber } from "@/lib/utils";
 
 const FEATURES = [
@@ -36,6 +46,8 @@ const STATS = [
   { label: "Сделок за месяц", value: 84_320 },
   { label: "Поддерживаемых игр", value: 142 },
   { label: "Средний рейтинг", value: 4.92 },
+  { label: "Plan A функций", value: PLAN_TOTAL_FEATURES },
+  { label: "Модулей платформы", value: PLAN_MODULES.length },
 ];
 
 export default function HomePage() {
@@ -47,7 +59,7 @@ export default function HomePage() {
         <GlassPanel withStripes className="px-6 sm:px-12 py-16 lg:py-24 relative">
           <div className="max-w-3xl mx-auto text-center relative z-10">
             <Badge variant="info" className="mb-5 mx-auto">
-              <Sparkles className="w-3 h-3" /> NEW · iOS 26 redesign
+              <Sparkles className="w-3 h-3" /> Plan A · 552 функции · iOS 26 redesign
             </Badge>
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-[1.05]">
               Маркетплейс
@@ -55,9 +67,9 @@ export default function HomePage() {
               <span className="text-secondary">игровой экономики</span>
             </h1>
             <p className="text-lg text-secondary max-w-xl mx-auto mb-8">
-              Покупай, продавай и автоматизируй сделки в World of Warcraft,
-              CS&nbsp;2, Dota 2, LoL и сотнях других игр. Безопасно. Быстро. С
-              комиссией от 5%.
+              Покупай, продавай, арендуй игры, управляй ботами, поддержкой,
+              API, уведомлениями и безопасностью в World of Warcraft, CS&nbsp;2,
+              Dota 2, LoL и сотнях других игр. Безопасно. Быстро. С комиссией от 5%.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link href="/marketplace">
@@ -65,9 +77,9 @@ export default function HomePage() {
                   Открыть маркетплейс
                 </Button>
               </Link>
-              <Link href="/automation">
-                <Button size="lg" variant="secondary">
-                  Подключить ботов
+              <Link href="/features">
+                <Button size="lg" variant="secondary" leftIcon={<Boxes className="w-4 h-4" />}>
+                  Карта Plan A
                 </Button>
               </Link>
             </div>
@@ -75,7 +87,7 @@ export default function HomePage() {
         </GlassPanel>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mt-6">
           {STATS.map((s) => (
             <Card key={s.label} variant="glass-subtle" padding="md">
               <p className="text-secondary text-xs uppercase tracking-wider">
@@ -110,6 +122,42 @@ export default function HomePage() {
             </Card>
           ))}
         </div>
+      </section>
+
+      {/* === PLAN A COVERAGE === */}
+      <section className="mb-20">
+        <GlassPanel className="p-6 sm:p-8">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-6">
+            <div>
+              <Badge variant="success" className="mb-3">
+                Полное покрытие плана
+              </Badge>
+              <h2 className="text-3xl font-bold">12 модулей, 552 функции</h2>
+              <p className="text-secondary mt-1 max-w-2xl">
+                План разложен на видимые страницы, mock-first API контракты,
+                WebSocket события, security checklist и dev center.
+              </p>
+            </div>
+            <Link href="/features">
+              <Button variant="secondary" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                Смотреть матрицу
+              </Button>
+            </Link>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {PLAN_MODULES.slice(0, 8).map((module) => (
+              <Card key={module.id} variant="glass-subtle" padding="md">
+                <p className="text-secondary text-xs uppercase tracking-wider">
+                  Модуль {module.number}
+                </p>
+                <h3 className="font-semibold mt-1">{module.title}</h3>
+                <p className="text-sm text-white/70 mt-2">
+                  {module.features.length} функций
+                </p>
+              </Card>
+            ))}
+          </div>
+        </GlassPanel>
       </section>
 
       {/* === GAMES === */}
