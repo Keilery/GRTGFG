@@ -4,8 +4,10 @@ export const APP_TAGLINE = "Маркетплейс игровых предмет
 export const NAV_MAIN = [
   { href: "/marketplace", label: "Маркетплейс" },
   { href: "/shop", label: "Магазин" },
-  { href: "/automation", label: "Автоматизация" },
   { href: "/rental", label: "Аренда" },
+  { href: "/automation", label: "Автоматизация" },
+  { href: "/features", label: "Plan A" },
+  { href: "/developers", label: "API" },
   { href: "/support", label: "Поддержка" },
 ];
 
@@ -26,6 +28,8 @@ export const NAV_PROFILE = [
   { href: "/profile", label: "Профиль" },
   { href: "/profile/orders", label: "Мои заказы" },
   { href: "/profile/wallet", label: "Кошелёк" },
+  { href: "/notifications", label: "Уведомления" },
+  { href: "/security", label: "Безопасность" },
   { href: "/profile/settings", label: "Настройки" },
 ];
 

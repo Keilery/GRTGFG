@@ -54,7 +54,7 @@ export function Header() {
             className="bg-transparent outline-none text-sm flex-1 placeholder:text-secondary"
           />
           <kbd className="text-[10px] text-secondary border border-white/10 px-1.5 py-0.5 rounded">
-            ⌘K
+Ctrl K
           </kbd>
         </div>
 
@@ -67,13 +67,14 @@ export function Header() {
           <span className="font-semibold">12 500 ₽</span>
         </Link>
 
-        <button
+        <Link
+          href="/notifications"
           className="relative p-2 rounded-full hover:bg-white/[0.06] transition"
           aria-label="Уведомления"
         >
           <Bell className="w-5 h-5" />
           <span className="absolute top-1 right-1.5 w-2 h-2 rounded-full bg-error" />
-        </button>
+        </Link>
 
         <Link
           href="/profile"
